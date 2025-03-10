@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
-const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID; // Use your Client ID from .env
-
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;  
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
