@@ -1,24 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID; // Use your Client ID from .env
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <GoogleOAuthProvider clientId={clientId}>
+      <GoogleLogin
+        onSuccess={(credentialResponse) => {
+          console.log('Login Success:', credentialResponse);
+        }}
+        onError={() => {
+          console.log('Login Failed');
+        }}
+      />
+    </GoogleOAuthProvider>
   );
 }
 
