@@ -18,7 +18,6 @@ function App() {
       <div style={{ textAlign: "center", marginTop: "50px" }}>
         <h1>React Google Sign-In</h1>
 
-        {/* Conditionally render the login button or logged-in message */}
         {!isLoggedIn ? (
           <GoogleLogin
             onSuccess={handleLoginSuccess}
