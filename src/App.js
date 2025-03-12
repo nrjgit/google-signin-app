@@ -3,6 +3,7 @@ import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;  
 function App() {
+  console.log("clientId", clientId);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleLoginSuccess = (credentialResponse) => {
