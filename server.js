@@ -1,12 +1,25 @@
 const express = require('express');
 const mongoose = require('mongoose'); 
 const path = require('path'); // ✅ Fix 1: path module required
+const https = require('https');
+const querystring = require('querystring');
 
 require('dotenv').config();
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+// ✅ Fix 4: Middleware should come last
+app.use(function (req, res, next) {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 
 mongoose.Promise = Promise; 
 
@@ -32,10 +45,6 @@ app.post('/send-text', (req, res) => {
     Body: `Your parking Spot: ${name}, available at ${address1}`,
   });
 
-const https = require('https');
-const querystring = require('querystring');
-
-
   const options = {
     hostname: process.env.TWILIO_HOSTNAME,
     path: process.env.TWILIO_PATH,
@@ -53,25 +62,15 @@ const querystring = require('querystring');
   twilioReq.end();
 });
 
-// ✅ Fix 3: Static files middleware should come AFTER API routes
 app.use(express.static(path.join(__dirname, "build")));
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
-// ✅ Fix 4: Middleware should come last
-app.use(function (req, res, next) {
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
-
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+app.listen(port, "0.0.0.0", () => {
+    console.log(`✅ Server running on port ${port}`);
 });
 
 console.log(app._router.stack.map(layer => layer.route && layer.route.path).filter(Boolean));
