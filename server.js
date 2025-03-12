@@ -18,6 +18,9 @@ app.get('/', (req, res) => {
   res.send('Server is running');
 })
 
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
 
 app.use(function (req, res, next) {
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin'); // Or use 'same-origin-allow-popups' if you need to allow popups
@@ -70,7 +73,8 @@ app.post('/send-text', (req, res) => {
   twilioReq.end();
 });
 
-app.use(express.static(__dirname + '/client/build/'));
+app.use(express.static(path.join(__dirname, "build")));
+
 
 console.log(app._router.stack.map(layer => layer.route && layer.route.path).filter(Boolean));
 
