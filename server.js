@@ -10,12 +10,17 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Logging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
 
 // ✅ Fix 4: Middleware should come last
 app.use(function (req, res, next) {
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
   res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Origin", "https://google-signin-app.onrender.com"); // Update this
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
@@ -31,13 +36,10 @@ app.get('/', (req, res) => {
   res.send('Server is running');
 });
 
-// ✅ Fix 2: API Routes should be before `express.static`
-
-var fromNumber = process.env.TWILIO_PHONE_NUMBER;
+const fromNumber = process.env.TWILIO_PHONE_NUMBER;
 
 app.post('/send-text', (req, res) => {
   const { phoneNumber, name, address1 } = req.body;
-
   
   const postData = querystring.stringify({
     To: `+91${phoneNumber}`,
@@ -65,15 +67,17 @@ app.post('/send-text', (req, res) => {
 app.use(express.static(path.join(__dirname, "build")));
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "build", "index.html"));
+  res.sendFile(path.join(__dirname, "build", "index.html"), (err) => {
+    if (err) {
+      res.status(404).send("Page not found");
+    }
+  });
 });
 
 const port = process.env.PORT || 3000;
 app.listen(port, "0.0.0.0", () => {
     console.log(`✅ Server running on port ${port}`);
 });
-
-console.log(app._router.stack.map(layer => layer.route && layer.route.path).filter(Boolean));
 
 module.exports = app;
 
