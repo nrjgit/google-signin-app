@@ -72,5 +72,7 @@ app.post('/send-text', (req, res) => {
 
 app.use(express.static(__dirname + '/client/build/'));
 
+console.log(app._router.stack.map(layer => layer.route && layer.route.path).filter(Boolean));
+
 module.exports = app;
 
