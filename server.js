@@ -1,12 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose'); 
+const path = require('path'); // ✅ Fix 1: path module required
 
-require('dotenv').config()
+require('dotenv').config();
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 
 mongoose.Promise = Promise; 
 
@@ -16,45 +16,25 @@ mongoose.connect(process.env.MONGODB_URI)
 
 app.get('/', (req, res) => {
   res.send('Server is running');
-})
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
-app.use(function (req, res, next) {
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin'); // Or use 'same-origin-allow-popups' if you need to allow popups
-  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp'); // Ensure embedded content is from a trusted origin
+// ✅ Fix 2: API Routes should be before `express.static`
 
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-
-  next();
-});
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
-
-
-var accountSid = process.env.TWILIO_ACCOUNT_SID;
-var authToken = process.env.TWILIO_AUTH_TOKEN;
 var fromNumber = process.env.TWILIO_PHONE_NUMBER;
-
-const client = require('twilio')(accountSid, authToken);
-
-
-const https = require('https');
-const querystring = require('querystring');
 
 app.post('/send-text', (req, res) => {
   const { phoneNumber, name, address1 } = req.body;
 
+  
   const postData = querystring.stringify({
     To: `+91${phoneNumber}`,
     From: `+1${fromNumber}`,
     Body: `Your parking Spot: ${name}, available at ${address1}`,
   });
+
+const https = require('https');
+const querystring = require('querystring');
+
 
   const options = {
     hostname: process.env.TWILIO_HOSTNAME,
@@ -73,8 +53,26 @@ app.post('/send-text', (req, res) => {
   twilioReq.end();
 });
 
+// ✅ Fix 3: Static files middleware should come AFTER API routes
 app.use(express.static(path.join(__dirname, "build")));
 
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
+
+// ✅ Fix 4: Middleware should come last
+app.use(function (req, res, next) {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
 
 console.log(app._router.stack.map(layer => layer.route && layer.route.path).filter(Boolean));
 
